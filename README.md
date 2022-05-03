@@ -2,6 +2,6 @@
 
 Igra z besedami.
 
-##Avtorji
+## Avtorji
 
-*Benjamin Levičar
+* Benjamin Levičar
