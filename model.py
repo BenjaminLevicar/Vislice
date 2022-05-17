@@ -1,4 +1,5 @@
 import random
+import json
 
 
 STEVILO_DOVOLJENIH_NAPAK = 10
@@ -9,6 +10,9 @@ NAPACNA_CRKA = '-'
 ZACETEK ='S'
 ZMAGA = 'W'
 PORAZ = 'L'
+
+DATOTEKA_Z_BESDAMI = 'besede.txt'
+DATOTEKA_S_STANJEM = 'stanje.json'
 
 class Igra:
 
@@ -72,7 +76,7 @@ class Igra:
                 else:
                     return NAPACNA_CRKA
 
-with open('besede.txt', encoding='utf-8') as f:
+with open(DATOTEKA_Z_BESDAMI, encoding='utf-8') as f:
     bazen_besed = [vrstica.strip().upper() for vrstica in f]
 
 def nova_igra():
@@ -82,6 +86,7 @@ class Vislice:
 
     def __init__(self) -> None:
         self.igre ={}
+        self.datoteka_s_stanjem = DATOTEKA_S_STANJEM
 
     def prost_id_igre(self):
         if len(self.igre) == 0:
@@ -90,13 +95,27 @@ class Vislice:
             return max(self.igre.keys()) + 1
 
     def nova_igra(self):
+        self.nalozi_igre_iz_datoteke()
         id_igre = self.prost_id_igre()
         igra = nova_igra()
         self.igre[id_igre] = (igra, ZACETEK)
+        self.zapisi_igre_v_datoteki()
         return id_igre
     
     def ugibaj(self, id_igre, crka):
         igra, _ = self.igre[id_igre]  # _ je notri saj potrebujemo samo prvi element v slovarju
         stanje = igra.ugibaj(crka)
         self.igre[id_igre] = (igra, stanje)
+
+    def zapisi_igre_v_datoteki(self):
+        with open(self.datoteka_s_stanjem, 'w', encoding='utf-8') as f:
+            igre = {id_igre: (igra.geslo, igra.crka, stanje)
+                for id_igre, (igra, stanje) in self.igre.items()}
+            json.dump(igre, f)
+
+    def nalozi_igre_iz_datoteke(self):
+        with open(self.datoteka_s_stanjem, 'r', encoding='utf-8') as f:
+            igre = json.load(f)
+            self.igre = {int(id_igre): (Igra(geslo, crke), stanje)
+                for id_igre, (geslo, crke, stanje) in igre.items()}
 
