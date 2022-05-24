@@ -1,5 +1,8 @@
+from importlib.resources import path
 import bottle
 import model
+
+SKRIVNOST = 'niz moja skrivnost'
 
 vislice = model.Vislice()
 
@@ -7,21 +10,24 @@ vislice = model.Vislice()
 def index():
     return bottle.template('index.tpl')
 
-@bottle.post ('/igra/')
+@bottle.post ('/nova_igra/')
 def nova_igra():
     id_igre = vislice.nova_igra()
-    bottle.redirect('/igra/{}/'.format(id_igre))
+    bottle.response.set_cookie('idigre', str(id_igre), path='/', secret=SKRIVNOST)
+    bottle.redirect('/igra/')
 
-@bottle.post('/igra/<id_igre:int>/')
-def ugibaj(id_igre):
+@bottle.post('/igra/')
+def ugibaj():
     crka = bottle.request.forms.getunicode('crka')
+    id_igre = int(bottle.request.get_cookie('idigre', secret=SKRIVNOST))
     vislice.ugibaj(id_igre, crka)
-    bottle.redirect('/igra/{}/.'.format(id_igre))
+    bottle.redirect('/igra/')
 
-@bottle.get('/igra/<id_igre:int>/')
-def pokazi_igro(id_igre):
+@bottle.get('/igra/')
+def pokazi_igro():
+    id_igre = int(bottle.request.get_cookie('idigre', secret=SKRIVNOST))
     igra, stanje = vislice.igre[id_igre]
-    return bottle.template('igra.tpl',id_igre=id_igre, igra=igra, stanje=stanje)
+    return bottle.template('igra.tpl', igra=igra, stanje=stanje)
 
 @bottle.get('/img/<picture>')
 def serve_picture(picture):

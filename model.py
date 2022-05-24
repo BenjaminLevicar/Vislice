@@ -103,9 +103,11 @@ class Vislice:
         return id_igre
     
     def ugibaj(self, id_igre, crka):
+        self.nalozi_igre_iz_datoteke()
         igra, _ = self.igre[id_igre]  # _ je notri saj potrebujemo samo prvi element v slovarju
         stanje = igra.ugibaj(crka)
         self.igre[id_igre] = (igra, stanje)
+        self.zapisi_igre_v_datoteki()
 
     def zapisi_igre_v_datoteki(self):
         with open(self.datoteka_s_stanjem, 'w', encoding='utf-8') as f:
